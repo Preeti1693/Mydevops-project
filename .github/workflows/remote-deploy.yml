@@ -1,0 +1,25 @@
+name: Remote EC2 Execution
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ssh-into-ec2:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Connect to EC2 and run script
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd /home/ubuntu/Mydevops-project/scripts
+          chmod +x check_services.sh
+          ./check_services.sh
