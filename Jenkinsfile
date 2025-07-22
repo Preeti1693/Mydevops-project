@@ -4,25 +4,42 @@ pipeline {
     stages {
         stage('Clone Repo') {
             steps {
-                git 'https://github.com/yourname/Mydevops-project.git'
+                git 'https://github.com/Preeti1693/Mydevops-project.git'
             }
         }
 
-        stage('Docker Compose Up') {
+        stage('Build Frontend Image') {
             steps {
-                sh 'docker-compose down || true'
-                sh 'docker-compose up -d --build'
+                sh '''
+                    docker build -t sellit-frontend ./frontend
+                '''
             }
         }
-    }
 
-    post {
-        success {
-            echo 'App deployed using Docker Compose!'
+        stage('Deploy Frontend Container') {
+            steps {
+                sh '''
+                    docker rm -f sellit-frontend || true
+                    docker run -d -p 3001:80 --name sellit-frontend sellit-frontend
+                '''
+            }
         }
-        failure {
-            echo 'Something went wrong!'
+
+        stage('Build Backend Image') {
+            steps {
+                sh '''
+                    docker build -t mydevops-project_backend ./backend
+                '''
+            }
+        }
+
+        stage('Deploy Backend Container') {
+            steps {
+                sh '''
+                    docker rm -f sellit-backend || true
+                    docker run -d -p 5002:5000 --name sellit-backend mydevops-project_backend
+                '''
+            }
         }
     }
 }
-
